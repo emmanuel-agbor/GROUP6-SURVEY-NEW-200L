@@ -82,8 +82,4 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   number: "Number",
 };
 
-export const CHOICE_QUESTION_TYPES: QuestionType[] = [
-  "multiple_choice",
-  "checkbox",
-  "dropdown",
-];
+export const CHOICE_QUESTION_TYPES: QuestionType[] = ["multiple_choice", "checkbox", "dropdown"];

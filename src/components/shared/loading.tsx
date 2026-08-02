@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 
 export function Spinner({ className, label }: { className?: string; label?: string }) {
   return (
-    <span role="status" className={cn("inline-flex items-center gap-2 text-muted-foreground", className)}>
+    <span
+      role="status"
+      className={cn("inline-flex items-center gap-2 text-muted-foreground", className)}
+    >
       <Loader2 className="size-4 animate-spin" aria-hidden="true" />
       <span className={label ? "text-sm" : "sr-only"}>{label ?? "Loading"}</span>
     </span>

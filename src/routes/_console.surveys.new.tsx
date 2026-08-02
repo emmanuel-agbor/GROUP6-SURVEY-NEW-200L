@@ -239,7 +239,9 @@ function CreateSurveyPage() {
             title="Start with one question"
             description="Pick an answer type, write the question, and mark it required if you need an answer."
             action={
-              <Button onClick={() => setQuestions([createQuestion()])}>Add your first question</Button>
+              <Button onClick={() => setQuestions([createQuestion()])}>
+                Add your first question
+              </Button>
             }
           />
         ) : (

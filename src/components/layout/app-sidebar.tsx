@@ -1,5 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BarChart3, FilePlus2, Inbox, LayoutDashboard, ListChecks, Settings, User } from "lucide-react";
+import {
+  BarChart3,
+  FilePlus2,
+  Inbox,
+  LayoutDashboard,
+  ListChecks,
+  Settings,
+  User,
+} from "lucide-react";
 import { Brand } from "@/components/shared/brand";
 import {
   Sidebar,

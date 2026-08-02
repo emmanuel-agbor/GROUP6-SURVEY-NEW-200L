@@ -82,20 +82,20 @@ const TESTIMONIALS = [
   {
     quote:
       "We replaced three tools with SurveyFlow. Writing a survey now feels like writing a doc — and the results are readable without a data analyst.",
-    name: "Amara Diallo",
-    role: "Research Lead, Northwind",
+    name: "Blessing Thompson",
+    role: "Team Lead, ",
   },
   {
     quote:
       "The builder is the first one my team didn't complain about. Reordering questions and marking them required is obvious from the first minute.",
-    name: "Tomas Weber",
-    role: "Product Manager, Loop",
+    name: "Harmony Nyesom",
+    role: "Researcher, Loop",
   },
   {
     quote:
       "Completion rate went up once we moved our onboarding survey over. Mobile respondents finally finish it.",
-    name: "Priya Raman",
-    role: "Head of CX, Fernwood",
+    name: "Wealth Imo",
+    role: "CEO, Marvin",
   },
 ];
 
@@ -139,7 +139,8 @@ export function HeroSection() {
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
           SurveyFlow gives your team one place to build surveys, collect responses, and understand
-          what people actually said — without exporting anything.
+          what people actually said. No more copy-pasting between tools, no more lost context, no
+          more messy exports.
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
@@ -161,7 +162,9 @@ export function FeaturesSection() {
   return (
     <section id="features" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6">
       <div className="max-w-2xl">
-        <h2 className="text-3xl font-semibold text-foreground">Built for the whole survey lifecycle</h2>
+        <h2 className="text-3xl font-semibold text-foreground">
+          Built for the whole survey lifecycle
+        </h2>
         <p className="mt-3 text-muted-foreground">
           From the first draft question to the final export, each step lives in the same interface.
         </p>

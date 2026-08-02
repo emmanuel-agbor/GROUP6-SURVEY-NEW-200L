@@ -134,7 +134,9 @@ function SurveysPage() {
           {visibleSurveys.length === 0 ? (
             <EmptyState
               icon={FileText}
-              title={query || status !== "all" ? "No surveys match those filters" : "No surveys yet"}
+              title={
+                query || status !== "all" ? "No surveys match those filters" : "No surveys yet"
+              }
               description={
                 query || status !== "all"
                   ? "Try a different search term or clear the status filter."
@@ -220,7 +222,9 @@ function SurveysPage() {
                               <DropdownMenuItem>Duplicate</DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {/* TODO: Integrate Spring Boot endpoint for deleting a survey. */}
-                              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive">
+                                Delete
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
