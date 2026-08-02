@@ -99,7 +99,8 @@
     color-mix(in oklab, var(--primary) 12%, transparent) 0%,
     transparent 62%
   );
-  --shadow-soft: 0 1px 2px oklch(0.21 0.02 250 / 0.06), 0 8px 24px -12px oklch(0.21 0.02 250 / 0.14);
+  --shadow-soft:
+    0 1px 2px oklch(0.21 0.02 250 / 0.06), 0 8px 24px -12px oklch(0.21 0.02 250 / 0.14);
   --shadow-raised:
     0 1px 2px oklch(0.21 0.02 250 / 0.08), 0 18px 40px -18px oklch(0.21 0.02 250 / 0.24);
   --chart-1: oklch(0.646 0.222 41.116);

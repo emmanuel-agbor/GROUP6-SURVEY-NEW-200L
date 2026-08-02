@@ -102,7 +102,10 @@ function ResponsesPage() {
         setExportProgress(Math.min(95, Math.round((rows.length / visible.length) * 95)));
         await new Promise((resolve) => setTimeout(resolve, 60));
       }
-      downloadCsv(`surveyflow-responses-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(rows, CSV_COLUMNS));
+      downloadCsv(
+        `surveyflow-responses-${new Date().toISOString().slice(0, 10)}.csv`,
+        toCsv(rows, CSV_COLUMNS),
+      );
       setExportProgress(100);
       toast.success(`Exported ${rows.length} response${rows.length === 1 ? "" : "s"} to CSV`);
     } catch {
@@ -147,9 +150,7 @@ function ResponsesPage() {
 
           {exporting ? (
             <div className="space-y-2" aria-live="polite">
-              <p className="text-sm text-muted-foreground">
-                Preparing CSV… {exportProgress}%
-              </p>
+              <p className="text-sm text-muted-foreground">Preparing CSV… {exportProgress}%</p>
               <Progress value={exportProgress ?? 0} aria-label="CSV export progress" />
             </div>
           ) : null}
@@ -213,11 +214,7 @@ function ResponsesPage() {
                   </TableBody>
                 </Table>
               </div>
-              <TablePagination
-                page={page}
-                pageCount={pageCount}
-                onPageChange={setPage}
-              />
+              <TablePagination page={page} pageCount={pageCount} onPageChange={setPage} />
             </>
           )}
         </CardContent>

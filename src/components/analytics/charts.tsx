@@ -124,7 +124,11 @@ export function TopSurveysChart({ data }: { data: { title: string; responses: nu
   const options = baseOptions() as ChartOptions<"bar">;
   return (
     <Bar
-      options={{ ...options, indexAxis: "y", plugins: { ...options.plugins, legend: { display: false } } }}
+      options={{
+        ...options,
+        indexAxis: "y",
+        plugins: { ...options.plugins, legend: { display: false } },
+      }}
       data={{
         labels: data.map((item) => item.title),
         datasets: [
