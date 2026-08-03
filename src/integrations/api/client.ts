@@ -1,4 +1,6 @@
-const BASE_URL = import.meta.env["VITE_API_URL"] ?? "";
+import { ENVIRONMENT } from "@/constant/environment";
+
+const BASE_URL = ENVIRONMENT.BACKEND_URL ?? import.meta.env["VITE_API_URL"] ?? "";
 
 interface ApiError {
   status: number;
@@ -14,6 +16,8 @@ interface ParsedResponse {
 
 async function request(path: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
+
+  console.log("BASE_URL:", BASE_URL);
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
