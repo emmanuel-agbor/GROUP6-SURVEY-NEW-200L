@@ -143,7 +143,7 @@ function SurveyDetailsPage() {
               description="Questions appear here once this survey is connected to the API."
               action={
                 <Button asChild variant="outline">
-                  <Link to="/surveys/new">Create a survey</Link>
+                  <a href="/surveys/new">Create a survey</a>
                 </Button>
               }
             />

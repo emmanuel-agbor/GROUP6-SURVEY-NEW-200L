@@ -40,3 +40,6 @@ export const getUserProfile = (userId: string) =>
   request(`api/users/${userId}/profile`, {
     method: "GET",
   });
+
+
+

@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check, HelpCircle, Loader2, Plus, RotateCcw, Save, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -18,7 +18,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { clearDraft, loadDraft, saveDraft } from "@/lib/survey-draft";
+import { getStoredUser, isAuthenticated } from "@/lib/auth";
+import {
+  createSurvey,
+  deleteSurvey,
+  publishSurvey,
+  toSurveyPayload,
+  updateSurvey,
+} from "@/integrations/api/surveyEndpoint";
 import type { SurveyQuestion } from "@/types/survey";
 
 const TITLE = "Create a survey — SurveyFlow";
@@ -49,65 +56,100 @@ function createQuestion(): SurveyQuestion {
   };
 }
 
+function canSave(title: string, questions: SurveyQuestion[]) {
+  if (title.trim() === "" || questions.length === 0) return false;
+  return questions.every((q) => {
+    if (q.title.trim() === "") return false;
+    if (q.type === "multiple_choice" || q.type === "checkbox" || q.type === "dropdown") {
+      return (q.options ?? []).filter((o) => o.trim() !== "").length >= 2;
+    }
+    return true;
+  });
+}
+
 function CreateSurveyPage() {
+  const navigate = useNavigate();
+
+  // Route guard: bounce unauthenticated visitors straight to sign-in.
+  // (Belt-and-suspenders — the real gate should live in a route beforeLoad,
+  // but this keeps the page safe even if that isn't wired up yet.)
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate({ to: "/login" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const user = getStoredUser();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
-  const [status, setStatus] = useState<"loading" | "loaded">("loading");
   const [savedAt, setSavedAt] = useState<string>("");
   const [saving, setSaving] = useState(false);
-  const [restored, setRestored] = useState(false);
-  const dirtyRef = useRef(false);
+  const [publishing, setPublishing] = useState(false);
 
-  // Restore any locally autosaved draft on first paint.
-  // TODO: Integrate Spring Boot endpoint for loading a server-side draft.
-  useEffect(() => {
-    const draft = loadDraft();
-    if (draft) {
-      setTitle(draft.title);
-      setDescription(draft.description);
-      setQuestions(draft.questions);
-      setSavedAt(draft.savedAt);
-      const maxId = draft.questions.reduce((max, question) => {
-        const parsed = Number.parseInt(question.id.replace("question-", ""), 10);
-        return Number.isFinite(parsed) ? Math.max(max, parsed) : max;
-      }, 0);
-      questionCounter = Math.max(questionCounter, maxId);
-      setRestored(true);
-    }
-    setStatus("loaded");
-  }, []);
+  // Set once the first save succeeds and the backend has assigned an id.
+  // Everything after that point is an update against this same draft survey.
+  const surveyIdRef = useRef<string | null>(null);
 
-  const persist = useCallback(
-    (options?: { explicit?: boolean }) => {
-      setSaving(true);
-      const next = saveDraft({ title, description, questions });
-      setSavedAt(next.savedAt);
-      setSaving(false);
-      if (options?.explicit) toast.success("Draft saved locally");
-    },
-    [title, description, questions],
-  );
-
-  // Debounced autosave whenever the draft changes.
-  useEffect(() => {
-    if (status !== "loaded") return;
-    if (!dirtyRef.current) {
-      dirtyRef.current = true;
+  const persist = useCallback(async () => {
+    if (!user) return;
+    if (!canSave(title, questions)) {
+      toast.error("Add a title and finish every question before saving");
       return;
     }
-    const timer = setTimeout(() => persist(), 800);
-    return () => clearTimeout(timer);
-  }, [status, persist]);
+    setSaving(true);
+    const payload = toSurveyPayload(title, description, questions);
+    try {
+      if (surveyIdRef.current) {
+        await updateSurvey(surveyIdRef.current, user.id, payload);
+      } else {
+        const created = await createSurvey(user.id, payload);
+        surveyIdRef.current = created.id;
+      }
+      setSavedAt(new Date().toISOString());
+      toast.success("Draft saved");
+    } catch {
+      toast.error("Couldn't save the draft");
+    } finally {
+      setSaving(false);
+    }
+  }, [title, description, questions, user]);
 
-  const discardDraft = () => {
-    clearDraft();
+  const discardDraft = async () => {
+    if (surveyIdRef.current && user) {
+      try {
+        await deleteSurvey(surveyIdRef.current, user.id);
+      } catch {
+        toast.error("Couldn't delete the saved draft — it may still exist on the server");
+      }
+      surveyIdRef.current = null;
+    }
     setTitle("");
     setDescription("");
     setQuestions([]);
     setSavedAt("");
-    setRestored(false);
     toast.success("Draft discarded");
+  };
+
+  const publish = async () => {
+    if (!user) return;
+    setPublishing(true);
+    try {
+      const payload = toSurveyPayload(title, description, questions);
+      const surveyId = surveyIdRef.current
+        ? (await updateSurvey(surveyIdRef.current, user.id, payload)).id
+        : (await createSurvey(user.id, payload)).id;
+      surveyIdRef.current = surveyId;
+      await publishSurvey(surveyId, user.id);
+      toast.success("Survey published");
+      navigate({ to: "/surveys" });
+    } catch {
+      toast.error("Couldn't publish the survey");
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const moveQuestion = (index: number, direction: -1 | 1) => {
@@ -121,6 +163,13 @@ function CreateSurveyPage() {
     });
   };
 
+  const readyToPublish = !!user && canSave(title, questions) && !publishing;
+
+  if (!user) {
+    // Mid-redirect (see the effect above) — avoid flashing the form.
+    return null;
+  }
+
   return (
     <>
       <PageHeader
@@ -128,8 +177,7 @@ function CreateSurveyPage() {
         description="Add your questions, mark what's required, then publish when it reads well."
         actions={
           <>
-            {/* TODO: Integrate Spring Boot endpoint for saving a survey draft server-side. */}
-            <Button variant="outline" onClick={() => persist({ explicit: true })} disabled={saving}>
+            <Button variant="outline" onClick={() => persist()} disabled={saving}>
               {saving ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : (
@@ -137,9 +185,12 @@ function CreateSurveyPage() {
               )}
               Save draft
             </Button>
-            {/* TODO: Integrate Spring Boot endpoint for publishing a survey. */}
-            <Button disabled={questions.length === 0 || title.trim() === ""}>
-              <Send className="size-4" aria-hidden="true" />
+            <Button disabled={!readyToPublish} onClick={publish}>
+              {publishing ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Send className="size-4" aria-hidden="true" />
+              )}
               Publish
             </Button>
           </>
@@ -164,19 +215,13 @@ function CreateSurveyPage() {
         className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
         aria-live="polite"
       >
-        {status === "loading" ? (
-          <span className="inline-flex items-center gap-2">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            Restoring your draft…
-          </span>
-        ) : savedAt ? (
+        {savedAt ? (
           <span className="inline-flex items-center gap-2">
             <Check className="size-4 text-success" aria-hidden="true" />
-            {restored ? "Draft restored — " : ""}Autosaved at{" "}
-            {new Date(savedAt).toLocaleTimeString()}
+            Saved at {new Date(savedAt).toLocaleTimeString()}
           </span>
         ) : (
-          <span>Changes autosave to this browser as you type.</span>
+          <span>Click "Save draft" to save your progress.</span>
         )}
         {savedAt ? (
           <Button variant="ghost" size="sm" onClick={discardDraft}>
@@ -199,7 +244,6 @@ function CreateSurveyPage() {
               placeholder="Customer onboarding feedback"
               required
               value={title}
-              disabled={status === "loading"}
               onChange={(event) => setTitle(event.target.value)}
             />
           </div>
@@ -210,7 +254,6 @@ function CreateSurveyPage() {
               rows={3}
               placeholder="Tell respondents why you're asking and how long this will take."
               value={description}
-              disabled={status === "loading"}
               onChange={(event) => setDescription(event.target.value)}
             />
           </div>
