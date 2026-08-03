@@ -58,8 +58,6 @@ function LoginPage() {
       .finally(() => {
         setSubmitting(false);
       });
-
-    setSubmitting(false);
   };
 
   return (
