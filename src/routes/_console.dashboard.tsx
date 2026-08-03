@@ -122,43 +122,47 @@ function DashboardPage() {
             )}
           </section>
 
-          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <Card>
-              <CardHeader>
+          <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)]">
+            <Card className="overflow-hidden">
+              <CardHeader className="px-4 sm:px-6">
                 <CardTitle>Recent surveys</CardTitle>
                 <CardDescription>The surveys your team touched most recently.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-0 sm:px-0">
                 {loading ? (
-                  <TableSkeleton rows={5} columns={4} />
+                  <div className="px-4 sm:px-6">
+                    <TableSkeleton rows={5} columns={4} />
+                  </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <Table>
+                    <Table className="min-w-[560px] sm:min-w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Survey</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Responses</TableHead>
-                          <TableHead>Last updated</TableHead>
+                          <TableHead className="w-[40%] px-4 sm:px-6">Survey</TableHead>
+                          <TableHead className="px-4 sm:px-6">Status</TableHead>
+                          <TableHead className="px-4 sm:px-6 text-right">Responses</TableHead>
+                          <TableHead className="px-4 sm:px-6">Last updated</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {data.recentSurveys.map((survey) => (
-                          <TableRow key={survey.id}>
-                            <TableCell className="max-w-56 truncate font-medium">
+                          <TableRow key={survey.id} className="align-middle">
+                            <TableCell className="max-w-[220px] px-4 sm:px-6">
                               <Link
                                 to="/surveys/$surveyId"
                                 params={{ surveyId: survey.id }}
-                                className="hover:underline"
+                                className="block truncate font-medium text-foreground transition-colors hover:text-primary hover:underline"
                               >
                                 {survey.title}
                               </Link>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="px-4 sm:px-6">
                               <StatusBadge status={survey.status} />
                             </TableCell>
-                            <TableCell className="text-right">{survey.responses}</TableCell>
-                            <TableCell className="text-muted-foreground">
+                            <TableCell className="px-4 sm:px-6 text-right">
+                              {survey.responses}
+                            </TableCell>
+                            <TableCell className="px-4 sm:px-6 text-muted-foreground">
                               {formatRelativeTime(survey.updatedAt)}
                             </TableCell>
                           </TableRow>
@@ -170,15 +174,15 @@ function DashboardPage() {
               </CardContent>
             </Card>
 
-            <div className="space-y-6">
+            <div className="flex flex-col gap-6">
               <QuickActionsCard />
 
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="px-4 sm:px-6">
                   <CardTitle>Recent activity</CardTitle>
                   <CardDescription>Changes made across the workspace.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 sm:px-6">
                   {loading ? (
                     <div className="space-y-3" aria-hidden="true">
                       {Array.from({ length: 4 }).map((_, index) => (

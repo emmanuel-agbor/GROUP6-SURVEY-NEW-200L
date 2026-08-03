@@ -47,12 +47,12 @@ const ACTIONS: QuickAction[] = [
 
 export function QuickActionsCard() {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden">
+      <CardHeader className="px-4 sm:px-6">
         <CardTitle>Quick actions</CardTitle>
         <CardDescription>Jump straight to the thing you came here for.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-1">
+      <CardContent className="grid gap-2 px-3 pb-4 sm:px-6 sm:pb-6">
         {ACTIONS.map((action) => (
           <Link
             key={action.title}
