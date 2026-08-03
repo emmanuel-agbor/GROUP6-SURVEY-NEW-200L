@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTheme } from "@/lib/use-theme";
+import { clearAuth } from "@/lib/auth";
 
 export function AppTopbar() {
   const { resolved, setPreference } = useTheme();
@@ -57,7 +58,7 @@ export function AppTopbar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               {/* TODO: Integrate Spring Boot endpoint for sign out. */}
-              <Link to="/login">
+              <Link to="/login" onClick={() => clearAuth()}>
                 <LogOut className="size-4" aria-hidden="true" />
                 Sign out
               </Link>

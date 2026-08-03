@@ -25,14 +25,17 @@ interface ActivityTimelineProps {
 
 export function ActivityTimeline({ items }: ActivityTimelineProps) {
   return (
-    <ol>
+    <ol className="space-y-2">
       {items.map((item, index) => {
         const Icon = KIND_ICON[item.kind];
         const isLast = index === items.length - 1;
 
         return (
-          <li key={item.id} className={isLast ? undefined : "border-b border-border/70"}>
-            <div className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+          <li
+            key={item.id}
+            className={isLast ? undefined : "border-b border-border/70 pb-2 last:pb-0"}
+          >
+            <div className="flex items-start gap-3 py-2 first:pt-0 last:pb-0">
               <span
                 className={`grid size-8 shrink-0 place-items-center rounded-full ${KIND_TONE[item.kind]}`}
               >
