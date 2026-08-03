@@ -1,4 +1,4 @@
-import type { SurveyQuestion } from "@/types/survey";
+import type { Survey, SurveyQuestion } from "@/types/survey";
 
 /**
  * Local draft persistence for the survey builder.
@@ -12,6 +12,7 @@ export interface SurveyDraft {
 }
 
 const DRAFT_KEY = "surveyflow-survey-draft";
+const PUBLISHED_KEY = "surveyflow-published-surveys";
 
 export const emptyDraft: SurveyDraft = {
   title: "",
@@ -54,4 +55,59 @@ export function clearDraft() {
   } catch {
     // ignore
   }
+}
+
+export function loadPublishedSurveys(): Survey[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PUBLISHED_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is Survey => {
+      if (typeof item !== "object" || item === null) return false;
+      const survey = item as Partial<Survey>;
+      return (
+        typeof survey.id === "string" &&
+        typeof survey.title === "string" &&
+        typeof survey.status === "string" &&
+        typeof survey.createdAt === "string" &&
+        typeof survey.updatedAt === "string" &&
+        typeof survey.responseCount === "number"
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
+export function loadPublishedSurvey(id: string): Survey | null {
+  return loadPublishedSurveys().find((survey) => survey.id === id) ?? null;
+}
+
+export function publishSurvey(payload: {
+  title: string;
+  description: string;
+  questions: SurveyQuestion[];
+}): Survey {
+  const now = new Date().toISOString();
+  const survey: Survey = {
+    id: `survey-${now}-${Math.random().toString(36).slice(2, 8)}`,
+    title: payload.title.trim(),
+    description: payload.description.trim(),
+    status: "active",
+    createdAt: now,
+    updatedAt: now,
+    responseCount: 0,
+    questions: payload.questions,
+  };
+
+  try {
+    const existing = loadPublishedSurveys();
+    window.localStorage.setItem(PUBLISHED_KEY, JSON.stringify([survey, ...existing]));
+  } catch {
+    // Storage unavailable (private mode / quota) — publish is best-effort.
+  }
+
+  return survey;
 }

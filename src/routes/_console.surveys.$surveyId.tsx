@@ -15,8 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { pendingResource } from "@/lib/api-placeholder";
-import { QUESTION_TYPE_LABELS, type Survey } from "@/types/survey";
+import { loadPublishedSurvey } from "@/lib/survey-draft";
+import { QUESTION_TYPE_LABELS } from "@/types/survey";
 
 const TITLE = "Survey details — SurveyFlow";
 const DESCRIPTION =
@@ -37,8 +37,7 @@ export const Route = createFileRoute("/_console/surveys/$surveyId")({
 function SurveyDetailsPage() {
   const { surveyId } = Route.useParams();
 
-  // TODO: Integrate Spring Boot endpoint for fetching a survey by id.
-  const survey = pendingResource<Survey>();
+  const survey = loadPublishedSurvey(surveyId);
 
   return (
     <>

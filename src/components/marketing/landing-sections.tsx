@@ -139,7 +139,7 @@ export function HeroSection() {
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
           SurveyFlow gives your team one place to build surveys, collect responses, and understand
-          what people actually said. No more copy-pasting between tools, no more lost context, no
+          what people actually said. No more copy-pasting between tools, no more lost context, no /
           more messy exports.
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">

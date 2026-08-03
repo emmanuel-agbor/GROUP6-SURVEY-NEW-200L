@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check, HelpCircle, Loader2, Plus, RotateCcw, Save, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { clearDraft, loadDraft, saveDraft } from "@/lib/survey-draft";
+import { clearDraft, loadDraft, publishSurvey, saveDraft } from "@/lib/survey-draft";
 import type { SurveyQuestion } from "@/types/survey";
 
 const TITLE = "Create a survey — SurveyFlow";
@@ -50,6 +50,7 @@ function createQuestion(): SurveyQuestion {
 }
 
 function CreateSurveyPage() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
@@ -110,6 +111,33 @@ function CreateSurveyPage() {
     toast.success("Draft discarded");
   };
 
+  const canPublish =
+    title.trim() !== "" &&
+    questions.length > 0 &&
+    questions.every((question) => question.title.trim() !== "");
+
+  const handlePublish = () => {
+    if (!canPublish) {
+      toast.error("Add a title and complete every question before publishing.");
+      return;
+    }
+
+    const publishedSurvey = publishSurvey({
+      title: title.trim(),
+      description: description.trim(),
+      questions,
+    });
+
+    clearDraft();
+    setTitle("");
+    setDescription("");
+    setQuestions([]);
+    setSavedAt("");
+    setRestored(false);
+    toast.success("Survey published locally");
+    navigate({ to: "/surveys/$surveyId", params: { surveyId: publishedSurvey.id } });
+  };
+
   const moveQuestion = (index: number, direction: -1 | 1) => {
     setQuestions((current) => {
       const target = index + direction;
@@ -137,8 +165,7 @@ function CreateSurveyPage() {
               )}
               Save draft
             </Button>
-            {/* TODO: Integrate Spring Boot endpoint for publishing a survey. */}
-            <Button disabled={questions.length === 0 || title.trim() === ""}>
+            <Button disabled={!canPublish} onClick={handlePublish}>
               <Send className="size-4" aria-hidden="true" />
               Publish
             </Button>

@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { pendingCollection } from "@/lib/api-placeholder";
+import { loadPublishedSurveys } from "@/lib/survey-draft";
 import type { Survey, SurveyStatus } from "@/types/survey";
 
 const TITLE = "Surveys — SurveyFlow";
@@ -70,8 +70,7 @@ function SurveysPage() {
   const [status, setStatus] = useState<SurveyStatus | "all">("all");
   const [page, setPage] = useState(1);
 
-  // TODO: Integrate Spring Boot endpoint for fetching surveys (search, status filter, pagination).
-  const surveys = pendingCollection<Survey>();
+  const surveys = loadPublishedSurveys();
 
   const visibleSurveys = useMemo(() => {
     const term = query.trim().toLowerCase();
