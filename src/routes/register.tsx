@@ -49,13 +49,23 @@ function RegisterPage() {
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="register-name">Full name</Label>
+          <Label htmlFor="register-firstName">First name</Label>
           <Input
-            id="register-name"
-            name="fullName"
-            autoComplete="name"
+            id="register-firstName"
+            name="firstName"
+            autoComplete="first Name"
             required
-            placeholder="Alex Morgan"
+            placeholder="Alex"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="register-lastName">Last name</Label>
+          <Input
+            id="register-lastName"
+            name="lastName"
+            autoComplete="last Name"
+            required
+            placeholder="Morgan"
           />
         </div>
         <div className="space-y-2">
