@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Spinner } from "@/components/shared/loading";
@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/integrations/api/endpoints";
+import { AuthResponse } from "@/types/auth.types";
+import { toast } from "sonner";
+import { storeAuthResponse } from "@/lib/auth";
 
 const TITLE = "Sign in — SurveyFlow";
 const DESCRIPTION = "Sign in to your SurveyFlow workspace to manage surveys and review responses.";
@@ -24,11 +28,37 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
+  const navigation = useRouter();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const payload = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+      remember: formData.get("remember") === "on",
+    };
+
     // TODO: Integrate Spring Boot endpoint for authenticating the user.
+    login(payload)
+      .then((response) => {
+        if (!response) throw new Error("No response returned from login.");
+
+        const authResponse = response as AuthResponse;
+
+        toast.success("Signed in successfully!!");
+        storeAuthResponse(authResponse);
+        navigation.navigate({ to: "/dashboard" });
+      })
+      .catch((error) => {
+        toast.error(error.message || "An error occurred while signing in.");
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
+
     setSubmitting(false);
   };
 

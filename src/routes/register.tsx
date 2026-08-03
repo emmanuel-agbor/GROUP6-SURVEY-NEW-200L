@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { register } from "@/integrations/api/endpoints";
 import { toast } from "sonner";
+import { storeAuthResponse } from "@/lib/auth";
+import { AuthResponse } from "@/types/auth.types";
 
 const TITLE = "Create your account — SurveyFlow";
 const DESCRIPTION =
@@ -43,17 +45,22 @@ function RegisterPage() {
     };
 
     // TODO: Integrate Spring Boot endpoint for registering a new user.
-    console.log(payload);
     register(payload)
-    .then(_ => {
-      toast.success("Account created successfully!!");
-      navigation.navigate({ to: "/dashboard"});
-    })
-    .catch(error => {
-      toast.error(error.message || "An error occurred while creating the account.");
-    })
+      .then((response) => {
+        if (!response) throw new Error("No response returned from registration.");
 
-    setSubmitting(false);
+        const authResponse = response as AuthResponse;
+
+        toast.success("Account created successfully!!");
+        storeAuthResponse(authResponse);
+        navigation.navigate({ to: "/dashboard" });
+      })
+      .catch((error) => {
+        toast.error(error.message || "An error occurred while creating the account.");
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   return (
