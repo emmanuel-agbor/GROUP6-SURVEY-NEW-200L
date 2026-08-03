@@ -15,6 +15,7 @@ export function getStoredToken(): string | null {
 }
 
 export function getStoredUser(): AuthUser | null {
+  if (typeof window === "undefined") return null; // SSR-safe default
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;
   try {
@@ -30,5 +31,6 @@ export function clearAuth(): void {
 }
 
 export function isAuthenticated(): boolean {
+  if (typeof window === "undefined") return false; // SSR-safe default
   return getStoredToken() !== null;
 }
